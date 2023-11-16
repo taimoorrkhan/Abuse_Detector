@@ -2,10 +2,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
+import useFirebase from '../hook/useFirebase';
 const MenuScreen = ({ navigation, isAdmin }) => {
+  const { user ,signOut } = useFirebase();
   const [userName, setUserName] = useState("John Doe"); // Replace with user's name from state or props
 
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigation.navigate('LoginScreen');
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.profileContainer} onPress={() => navigation.navigate('UserScreen')}>
@@ -16,27 +26,35 @@ const MenuScreen = ({ navigation, isAdmin }) => {
         <Text style={styles.profileName}>{userName}</Text>
       </TouchableOpacity>
 
-      <View style={styles.menuItem}>
+      <TouchableOpacity onPress={() => {
+        navigation.navigate('ChangeInfo');
+      }} style={styles.menuItem}>
         <Ionicons name="information-circle-outline" size={24} color="#4267B2" />
         <Text style={styles.menuItemText}>Change Info</Text>
-      </View>
+      </TouchableOpacity>
 
-      <View style={styles.menuItem}>
+      <TouchableOpacity onPress={() => {
+        navigation.navigate('ChangePassword');
+      }} style={styles.menuItem}>
         <Ionicons name="key-outline" size={24} color="#4267B2" />
         <Text style={styles.menuItemText}>Change Password</Text>
-      </View>
+      </TouchableOpacity>
 
       {isAdmin && (
-        <View style={styles.menuItem}>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('ReportedPost');
+        }} style={styles.menuItem}>
           <Ionicons name="shield-checkmark-outline" size={24} color="#4267B2" />
           <Text style={styles.menuItemText}>See Reported Posts</Text>
-        </View>
+        </TouchableOpacity>
       )}
 
-      <View style={styles.menuItem}>
+      <TouchableOpacity onPress={() => {
+
+      }} style={styles.menuItem}>
         <Ionicons name="log-out-outline" size={24} color="#4267B2" />
         <Text style={styles.menuItemText}>Logout</Text>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -11,8 +11,9 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async (values) => {
     try {
       await signInWithEmailAndPassword(values.email, values.password);
+      
       // Handle successful login, e.g., navigate to another screen
-      Alert.alert('Login Success', 'You have successfully logged in!');
+      navigation.navigate('HomeNavigator');
     } catch (error) {
       // Handle login error
       Alert.alert('Login Error', error.message);

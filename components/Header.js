@@ -7,7 +7,7 @@ const Header = ({ onMessagesPress }) => {
   return (
     <View style={styles.header}>
       <Image
-        source={require('../assets/log.png')}
+        source={require('../assets/logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 50,
     resizeMode: 'contain',
+    borderRadius:60,
   },
   iconContainer: {
     position: 'relative',
