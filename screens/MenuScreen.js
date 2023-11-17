@@ -3,9 +3,13 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import useFirebase from '../hook/useFirebase';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 const MenuScreen = ({ navigation, isAdmin }) => {
   const { user ,signOut } = useFirebase();
-  const [userName, setUserName] = useState("John Doe"); // Replace with user's name from state or props
+  const [userName, setUserName] = useState("Taimoor Khan"); // Replace with user's name from state or props
+
+  const [profileImage, setProfileImage] = useState(null);
 
 
   const handleLogout = async () => {
@@ -18,11 +22,13 @@ const MenuScreen = ({ navigation, isAdmin }) => {
   };
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.profileContainer} onPress={() => navigation.navigate('UserScreen')}>
-        <Image
-          source={require('../assets/logo.png')} // Replace with your dynamic profile image source
-          style={styles.profilePic}
-        />
+      <TouchableOpacity style={styles.profileContainer} onPress={() => navigation.navigate('Profile')}>
+        {
+          profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profilePic} />
+          ) : (
+            <Icon name="account-circle" size={100} color="gray" />          )
+        }
         <Text style={styles.profileName}>{userName}</Text>
       </TouchableOpacity>
 
@@ -50,7 +56,7 @@ const MenuScreen = ({ navigation, isAdmin }) => {
       )}
 
       <TouchableOpacity onPress={() => {
-
+        handleLogout
       }} style={styles.menuItem}>
         <Ionicons name="log-out-outline" size={24} color="#4267B2" />
         <Text style={styles.menuItemText}>Logout</Text>

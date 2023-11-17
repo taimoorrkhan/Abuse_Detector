@@ -1,7 +1,7 @@
 // TabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MenuScreen, ProfileScreen,TextInputScreen } from '../screens/index';
+import { MenuScreen, TextInputScreen, ProfileScreen } from '../screens/index';
 import StackNavigator from './Navigator';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,7 +10,7 @@ const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="HomeNavigator"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarLabel: () => null,
@@ -19,7 +19,7 @@ const TabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'HomeNavigator') {
+          if (route.name === 'Main') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'More') {
             iconName = focused ? 'create' : 'create-outline';
@@ -35,9 +35,9 @@ const TabNavigator = () => {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen name="HomeNavigator" component={StackNavigator} />
+      <Tab.Screen name="Main" component={StackNavigator} />
       <Tab.Screen name="More" component={TextInputScreen} />
-  {/*     <Tab.Screen name="Profile" component={ProfileScreen} /> */}
+      <Tab.Screen name="Profile" component={ProfileScreen} /> 
       <Tab.Screen name="Menu" component={MenuScreen} />
     </Tab.Navigator>
   );

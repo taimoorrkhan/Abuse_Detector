@@ -64,9 +64,9 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.postActions}>
           <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
             <Ionicons
-              name={isLiked ? "thumbs-up" : "thumbs-up-outline"}
-              size={20}
-              color={isLiked ? "#2078F4" : "#65676b"}
+              name={isLiked ? "heart" : "heart-outline"}
+              size={24}
+              color={isLiked ? "red" : "black"}
             />
             <Text style={[styles.actionText, isLiked && styles.likedText]}>{item.likes} Likes</Text>
           </TouchableOpacity>

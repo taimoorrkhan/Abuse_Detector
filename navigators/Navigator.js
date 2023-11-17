@@ -5,10 +5,9 @@ import {
   HomeScreen, ChangePasswordScreen, ChangeInfoScreen,
   MenuScreen,SignupScreen,
   LoginScreen, ReportedPostScreen,
-  CreatePostScreen
+  CreatePostScreen,
+  ProfileScreen
 } from '../screens/index';
-import TabNavigator from './TabNavigator';
-
 const Stack = createStackNavigator();
 
 export const AuthNavigator = () => {
@@ -46,6 +45,7 @@ const StackNavigator = () => {
             <Stack.Screen name="Menu" component={MenuScreen} />
         <Stack.Screen name="ReportedPost" component={ReportedPostScreen} />
         <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+
           </>
     
        

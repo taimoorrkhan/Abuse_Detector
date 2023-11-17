@@ -4,17 +4,22 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 
 import useFirebase from '../hook/useFirebase';
+import CustomLoadingAnimation from '../components/CustomLoadingAnimation';
 
 const LoginScreen = ({ navigation }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { signInWithEmailAndPassword } = useFirebase();
 
   const handleLogin = async (values) => {
     try {
+      setIsLoading(true);
       await signInWithEmailAndPassword(values.email, values.password);
       
       // Handle successful login, e.g., navigate to another screen
       navigation.navigate('HomeNavigator');
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       // Handle login error
       Alert.alert('Login Error', error.message);
     }
@@ -63,7 +68,8 @@ const LoginScreen = ({ navigation }) => {
         )}
       </Formik>
       <TextButton title="Forgot Password?" onPress={() => {/* handleForgotPassword logic */ }} />
-      <TextButton title="Create New Account" onPress={() => navigation.navigate('SignUp')} />
+      <TextButton title="Create New Account" onPress={() => navigation.navigate('Signup')} />
+      <CustomLoadingAnimation isLoading={isLoading} />
     </View>
   );
 };

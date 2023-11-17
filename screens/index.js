@@ -7,6 +7,7 @@ import MenuScreen from './MenuScreen';
 import ChangeInfoScreen from './ChangeInfoScreen';
 import ChangePasswordScreen from './ChangePasswordScreen';
 import TextInputScreen from './TextInputScreen';
+import ProfileScreen from "./ProfileScreen";
 
 export {
   HomeScreen,
@@ -18,4 +19,5 @@ export {
   ChangeInfoScreen,
   ChangePasswordScreen,
   TextInputScreen,
+  ProfileScreen,
 }
