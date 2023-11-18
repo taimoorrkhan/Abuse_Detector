@@ -1,31 +1,42 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView, Modal, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Pressable, RefreshControl } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import useFirebase from '../hook/useFirebase';
+
 const HomeScreen = ({ navigation }) => {
-  const [likedPosts, setLikedPosts] = useState({});
-  const [expandedPosts, setExpandedPosts] = useState({});
+  const { user, getAllPosts, toggleLikeOnPost } = useFirebase();
+  const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // Dummy data for posts
-  const posts = [
-    { id: '1', text: 'یہ پہلی پوسٹ ہے', likes: 10, comments: 5 },
-    { id: '2', text: 'یہدوسریدوسریدوسریدوسری دوسری پوسٹ ہے', likes: 7, comments: 3 },
-    // ... more posts
-  ];
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-  const toggleLike = (postId) => {
-    setLikedPosts(prevState => ({
-      ...prevState,
-      [postId]: !prevState[postId]
-    }));
+  const fetchPosts = async () => {
+    setRefreshing(true);
+    try {
+      const allPosts = await getAllPosts();
+      setPosts(allPosts);
+    } catch (error) {
+      console.error(error);
+    }
+    setRefreshing(false);
   };
 
-  const toggleText = (postId) => {
-    setExpandedPosts(prevState => ({
-      ...prevState,
-      [postId]: !prevState[postId]
+  const handleToggleLike = async (postId) => {
+    await toggleLikeOnPost(postId);
+    setPosts(currentPosts => currentPosts.map(post => {
+      if (post.id === postId) {
+        const isLiked = post.likes.includes(user.uid);
+        return {
+          ...post,
+          likes: isLiked ? post.likes.filter(id => id !== user.uid) : [...post.likes, user.uid]
+        };
+      }
+      return post;
     }));
   };
 
@@ -33,46 +44,31 @@ const HomeScreen = ({ navigation }) => {
     setSelectedPost(postId);
     setModalVisible(true);
   };
-  const renderHeader = () => {
-    return (
-      <TouchableOpacity onPress={() => navigation.navigate('CreatePost')} style={styles.whatOnMind}>
-        <Text style={styles.whatOnMindText}>What's on your mind?</Text>
-      </TouchableOpacity>
-    );
-  };
+
+  const renderHeader = () => (
+    <TouchableOpacity onPress={() => navigation.navigate('CreatePost')} style={styles.whatOnMind}>
+      <Text style={styles.whatOnMindText}>What's on your mind?</Text>
+    </TouchableOpacity>
+  );
 
   const renderPost = ({ item }) => {
-    const isLiked = likedPosts[item.id];
-    const isExpanded = expandedPosts[item.id];
-    const shouldShowMore = item.text.split(' ').length > 25;
-    const textToShow = isExpanded ? item.text : `${item.text.split(' ').slice(0, 25).join(' ')}...`;
+    const isLiked = item.likes.includes(user.uid);
 
     return (
       <View style={styles.postContainer}>
         <TouchableOpacity style={styles.postOptions} onPress={() => openModal(item.id)}>
           <MaterialCommunityIcons name="dots-vertical" size={20} color="#65676b" />
         </TouchableOpacity>
-        <Text style={styles.postText}>
-          {textToShow}
-        </Text>
-        {shouldShowMore && (
-          <Text style={styles.showMoreText} onPress={() => toggleText(item.id)}>
-            {isExpanded ? 'Show Less' : 'Show More'}
-          </Text>
-        )}
+        <Text style={styles.postText}>{item.text}</Text>
         <View style={styles.divider} />
         <View style={styles.postActions}>
-          <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => handleToggleLike(item.id)}>
             <Ionicons
               name={isLiked ? "heart" : "heart-outline"}
               size={24}
               color={isLiked ? "red" : "black"}
             />
-            <Text style={[styles.actionText, isLiked && styles.likedText]}>{item.likes} Likes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="chatbubble-outline" size={20} color="#65676b" />
-            <Text style={styles.actionText}>{item.comments} Comments</Text>
+            <Text style={[styles.actionText, isLiked && styles.likedText]}>{item.likes.length} Likes</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -87,14 +83,18 @@ const HomeScreen = ({ navigation }) => {
         renderItem={renderPost}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={fetchPosts}
+          />
+        }
       />
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
+        onRequestClose={() => setModalVisible(!modalVisible)}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>

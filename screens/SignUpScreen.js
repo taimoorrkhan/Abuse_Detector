@@ -1,17 +1,22 @@
-import React from "react";
+import React,{useState} from "react";
 import { StyleSheet, View, TextInput, Text, Image, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import useFirebase from "../hook/useFirebase";
+import CustomLoadingAnimation from "../components/CustomLoadingAnimation";
 
 export default function SignupScreen({ navigation }) {
+  const [isLoading, setIsLoading] = useState(false);
   const { createUserWithEmailAndPassword } = useFirebase();
 
   const handleSignup = async (values) => {
     try {
-      await createUserWithEmailAndPassword(values.email, values.password);
-      navigation.navigate("NextScreen"); // Replace with your desired navigation logic
+      setIsLoading(true);
+      await createUserWithEmailAndPassword(values.name, values.email, values.password);
+      setIsLoading(false);
+      navigation.navigate("HomeNavigator"); // Replace with your desired navigation logic
     } catch (error) {
+      setIsLoading(false);
       console.error(error);
     }
   };
@@ -76,6 +81,7 @@ export default function SignupScreen({ navigation }) {
           )}
         </Formik>
       </ScrollView>
+      <CustomLoadingAnimation isLoading={isLoading} />
     </KeyboardAvoidingView>
   );
 }

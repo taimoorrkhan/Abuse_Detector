@@ -1,15 +1,40 @@
 // MenuScreen.js
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import useFirebase from '../hook/useFirebase';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const MenuScreen = ({ navigation, isAdmin }) => {
-  const { user ,signOut } = useFirebase();
-  const [userName, setUserName] = useState("Taimoor Khan"); // Replace with user's name from state or props
-
+const MenuScreen = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState(null);
+  const { user, signOut, fetchUserProfile } = useFirebase();
+  const [userdata, setUserData] = useState({
+    name: "",
+    email: "",
+    uid: "",
+    userRole: ""
+  });
+
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user && user.uid) {
+        try {
+          const userProfile = await fetchUserProfile(user.uid);
+          if (userProfile) {
+            setUserData(userProfile);
+            setProfileImage(userProfile.profileImageUrl);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+    loadUserProfile();
+  }, [user]);
+ 
+  const checkfunction = () => {
+    console.log(userdata.email, userdata.uid, userdata.name, userdata.userRole)
+  }
 
 
   const handleLogout = async () => {
@@ -29,7 +54,7 @@ const MenuScreen = ({ navigation, isAdmin }) => {
           ) : (
             <Icon name="account-circle" size={100} color="gray" />          )
         }
-        <Text style={styles.profileName}>{userName}</Text>
+        <Text style={styles.profileName}>{userdata.name}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => {
@@ -46,7 +71,7 @@ const MenuScreen = ({ navigation, isAdmin }) => {
         <Text style={styles.menuItemText}>Change Password</Text>
       </TouchableOpacity>
 
-      {isAdmin && (
+      {userdata.userRole == 'admin' && (
         <TouchableOpacity onPress={() => {
           navigation.navigate('ReportedPost');
         }} style={styles.menuItem}>
@@ -56,7 +81,7 @@ const MenuScreen = ({ navigation, isAdmin }) => {
       )}
 
       <TouchableOpacity onPress={() => {
-        handleLogout
+       checkfunction()
       }} style={styles.menuItem}>
         <Ionicons name="log-out-outline" size={24} color="#4267B2" />
         <Text style={styles.menuItemText}>Logout</Text>

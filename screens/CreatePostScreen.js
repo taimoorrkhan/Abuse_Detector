@@ -1,10 +1,55 @@
-// CreatePost.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import useFirebase from '../hook/useFirebase';
+import CustomLoadingAnimation from '../components/CustomLoadingAnimation';
 
 const CreatePostScreen = ({ navigation }) => {
-  const [postText, setPostText] = useState("");
+  const { user, createPost, fetchUserProfile } = useFirebase();
+  const [isLoading, setIsLoading] = useState(false);
+  const [postText, setPostText] = useState('');
+  const [userdata, setUserData] = useState({
+    name: '',
+    imageUri: '',
+  });
+
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user && user.uid) {
+        try {
+          const userProfile = await fetchUserProfile(user.uid);
+          if (userProfile) {
+            setUserData({
+              name: userProfile.name,
+              imageUri: userProfile.profileImageUrl,
+            });
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+    loadUserProfile();
+  }, [user]);
+
+  const handleSubmitPost = async () => {
+    if (postText.trim()) {
+      setIsLoading(true);
+      try {
+        await createPost({
+          text: postText,
+          authorId: user.uid,
+          // Add other post details as per your requirement
+        });
+        setPostText('');
+        navigation.goBack();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -13,16 +58,17 @@ const CreatePostScreen = ({ navigation }) => {
           <Ionicons name="arrow-back-outline" size={24} color="#4267B2" />
           <Text style={styles.headerText}>Create post</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {/* Handle post submission */ }} style={styles.postButton}>
+        <TouchableOpacity onPress={handleSubmitPost} style={styles.postButton}>
           <Text style={styles.postButtonText}>POST</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.profileContainer}>
-        <Image
-          source={require('../assets/logo.png')} // Replace with your profile picture
-          style={styles.profilePic}
-        />
-        <Text style={styles.profileName}>Logged In User Name </Text>
+        {userdata.imageUri ? (
+          <Image source={{ uri: userdata.imageUri }} style={styles.profilePic} />
+        ) : (
+          <MaterialCommunityIcons name="account-circle" size={40} color="gray" />
+        )}
+        <Text style={styles.profileName}>{userdata.name}</Text>
       </View>
       <TextInput
         value={postText}
@@ -31,6 +77,7 @@ const CreatePostScreen = ({ navigation }) => {
         style={styles.postInput}
         multiline
       />
+      <CustomLoadingAnimation isLoading={isLoading} />
     </View>
   );
 };
@@ -90,7 +137,7 @@ const styles = StyleSheet.create({
     color: '#1C1E21',
     paddingHorizontal: 12,
     paddingTop: 8,
-    paddingBottom: 100, // Give ample space for typing long texts
+    paddingBottom: 100, // Ample space for typing long texts
   },
 });
 

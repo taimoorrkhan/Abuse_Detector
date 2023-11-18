@@ -72,7 +72,6 @@ export default function useFirebase() {
     await user.updatePassword(newPassword);
   };
 
-  // Method to update the user profile
   const updateUserProfile = async (uid, name, email, imageUrl) => {
     try {
       await firebase.auth().currentUser.updateProfile({ displayName: name, photoURL: imageUrl });
@@ -129,13 +128,11 @@ export default function useFirebase() {
       await firebase.firestore().collection('users').doc(result.user.uid).set({
         name: name,
         email: email,
-        userRole : 'admin',
         uid: result.user.uid,
+        userRole: 'admin'
       });
 
-      const token = await result.user.getIdToken();
-      return { user: result.user, token };
-
+      return result;
     } catch (error) {
       console.log(error);
       throw error;
@@ -152,8 +149,134 @@ export default function useFirebase() {
       console.log(error)
     }
   }
- 
-  
+
+
+  const createPost = async (postData) => {
+    try {
+      await firebase.firestore().collection('posts').add({
+        ...postData,
+        authorId: user.uid, 
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
+        likes: [], 
+        comments: [], 
+      });
+    } catch (error) {
+      console.error("Error creating post: ", error);
+      throw error;
+    }
+  };
+  const getCurrentUserPosts = async () => {
+    try {
+      const querySnapshot = await firebase.firestore().collection('posts')
+        .where('authorId', '==', user.uid) // Filter posts by the current user
+        .orderBy('createdAt', 'desc') // Order by creation time, newest first
+        .get();
+
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("Error fetching user's posts: ", error);
+      throw error;
+    }
+  };
+
+  const getAllPosts = async () => {
+    try {
+      const querySnapshot = await firebase.firestore().collection('posts')
+        .orderBy('createdAt', 'desc') // Order by creation time, newest first
+        .get();
+
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("Error fetching all posts: ", error);
+      throw error;
+    }
+  };
+  const toggleLikeOnPost = async (postId) => {
+    try {
+      const postRef = firebase.firestore().collection('posts').doc(postId);
+      const postDoc = await postRef.get();
+
+      if (!postDoc.exists) {
+        throw new Error("Post not found");
+      }
+
+      const post = postDoc.data();
+      const likesArray = post.likes || [];
+      const userId = user.uid;
+
+      if (likesArray.includes(userId)) {
+        await postRef.update({
+          likes: likesArray.filter(id => id !== userId)
+        });
+      } else {
+        await postRef.update({
+          likes: [...likesArray, userId]
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like on post: ", error);
+      throw error;
+    }
+  };
+  const reportPost = async (postId, userId) => {
+    try {
+      const postRef = firebase.firestore().collection('posts').doc(postId);
+      const postDoc = await postRef.get();
+
+      if (!postDoc.exists) {
+        throw new Error("Post not found");
+      }
+
+      const post = postDoc.data();
+      await firebase.firestore().collection('reportedPosts').doc(postId).set({
+        ...post,
+        reportedBy: userId,
+        reportedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Optional: Remove post from the original collection or flag it as reported
+      // await postRef.update({ reported: true });
+    } catch (error) {
+      console.error("Error reporting post: ", error);
+      throw error;
+    }
+  };
+  const getReportedPosts = async () => {
+    try {
+      const querySnapshot = await firebase.firestore().collection('reportedPosts').get();
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("Error fetching reported posts: ", error);
+      throw error;
+    }
+  };
+  const deleteReportedPost = async (postId) => {
+    try {
+      const postRef = firebase.firestore().collection('posts').doc(postId);
+      const reportedPostRef = firebase.firestore().collection('reportedPosts').doc(postId);
+
+      const batch = firebase.firestore().batch();
+
+      batch.delete(postRef);
+      batch.delete(reportedPostRef);
+
+      await batch.commit();
+    } catch (error) {
+      console.error("Error deleting reported post: ", error);
+      throw error;
+    }
+  };
+  const handleNotAbusivePost = async (postId) => {
+    try {
+      await firebase.firestore().collection('reportedPosts').doc(postId).delete();
+    } catch (error) {
+      console.error("Error handling not abusive post: ", error);
+      throw error;
+    }
+  };
+
+
+
   
 
 
@@ -161,6 +284,7 @@ export default function useFirebase() {
     isConnected, user, updateUserProfile, uploadImageAndGetUrl,
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     signOut, fetchUserProfile, reauthenticateWithCredential, updatePassword,
+    createPost, getCurrentUserPosts, getAllPosts, toggleLikeOnPost
     
   }
 }
