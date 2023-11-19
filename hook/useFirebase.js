@@ -175,8 +175,8 @@ export default function useFirebase() {
   const getCurrentUserPosts = async () => {
     try {
       const querySnapshot = await firebase.firestore().collection('posts')
-        .where('authorId', '==', user.uid) // Filter posts by the current user
-        .orderBy('createdAt', 'desc') // Order by creation time, newest first
+        .where('authorId', '==', user.uid) 
+        .orderBy('createdAt', 'desc')
         .get();
 
       return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -189,7 +189,7 @@ export default function useFirebase() {
   const getAllPosts = async () => {
     try {
       const querySnapshot = await firebase.firestore().collection('posts')
-        .orderBy('createdAt', 'desc') // Order by creation time, newest first
+        .orderBy('createdAt', 'desc') 
         .get();
 
       return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -290,12 +290,29 @@ export default function useFirebase() {
         doc.ref.update({ authorImageUrl: newImageUrl });
       });
 
-      // Repeat for reported posts if needed
     } catch (error) {
       console.error("Error updating posts' images: ", error);
       throw error;
     }
   };
+  const deleteCurrentUserPost = async (postId) => {
+    try {
+      await firebase.firestore().collection('posts').doc(postId).delete();
+    } catch (error) {
+      console.error("Error deleting post: ", error);
+      throw error;
+    }
+  };
+
+  const editCurrentUserPost = async (postId, updatedData) => {
+    try {
+      await firebase.firestore().collection('posts').doc(postId).update(updatedData);
+    } catch (error) {
+      console.error("Error updating post: ", error);
+      throw error;
+    }
+  };
+
 
 
 
@@ -308,7 +325,8 @@ export default function useFirebase() {
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     signOut, fetchUserProfile, reauthenticateWithCredential, updatePassword,
     createPost, getCurrentUserPosts, getAllPosts, toggleLikeOnPost,
-    reportPost, getReportedPosts, deleteReportedPost, handleNotAbusivePost,updatePostsImage
+    reportPost, getReportedPosts, deleteReportedPost, handleNotAbusivePost, updatePostsImage,
+    deleteCurrentUserPost, editCurrentUserPost
     
   }
 }
