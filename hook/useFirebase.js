@@ -12,20 +12,25 @@ export default function useFirebase() {
     const initializeFirebase = async () => {
       try {
         firebase.initializeApp({
-          apiKey: "AIzaSyCYW5J0c-eIwtTWFLoAPfRw7uQY6Rap5kY",
-          authDomain: "abuse-7447.firebaseapp.com",
-          projectId: "abuse-7447",
-          storageBucket: "abuse-7447.appspot.com",
-          messagingSenderId: "704182685782",
-          appId: "1:704182685782:web:9a5cc01d8f3a0967ca2bf7",
-          measurementId: "G-66Y8MYNVYM"
+          apiKey: "AIzaSyDBBHEu3EW72B6VV31xTgKjxVkwGb90t4w",
+          authDomain: "bullyingfreezone-a3393.firebaseapp.com",
+          databaseURL: "https://bullyingfreezone-a3393-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "bullyingfreezone-a3393",
+          storageBucket: "bullyingfreezone-a3393.appspot.com",
+          messagingSenderId: "836204383675",
+          appId: "1:836204383675:web:f2ada3392e11117402889e"
         })
         setIsConnected(true)
       } catch (error) {
         console.log(error)
       }
     }
-    initializeFirebase()
+    initializeFirebase(
+      {
+        experimentalForceLongPolling: true,
+
+      }
+    )
 
     firebase.auth().onAuthStateChanged((currentUser) => {
       if (currentUser) {
@@ -155,6 +160,8 @@ export default function useFirebase() {
     try {
       await firebase.firestore().collection('posts').add({
         ...postData,
+        authorName: user.displayName,
+        authorProfileImageUrl: user.photoURL,
         authorId: user.uid, 
         createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
         likes: [], 
@@ -218,7 +225,7 @@ export default function useFirebase() {
       throw error;
     }
   };
-  const reportPost = async (postId, userId) => {
+  const reportPost = async (postId, userName) => {
     try {
       const postRef = firebase.firestore().collection('posts').doc(postId);
       const postDoc = await postRef.get();
@@ -230,7 +237,7 @@ export default function useFirebase() {
       const post = postDoc.data();
       await firebase.firestore().collection('reportedPosts').doc(postId).set({
         ...post,
-        reportedBy: userId,
+        reportedBy: userName,
         reportedAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
@@ -274,6 +281,22 @@ export default function useFirebase() {
       throw error;
     }
   };
+  const updatePostsImage = async (userId, newImageUrl) => {
+    try {
+      const postsRef = firebase.firestore().collection('posts').where('authorId', '==', userId);
+
+      const querySnapshot = await postsRef.get();
+      querySnapshot.forEach((doc) => {
+        doc.ref.update({ authorImageUrl: newImageUrl });
+      });
+
+      // Repeat for reported posts if needed
+    } catch (error) {
+      console.error("Error updating posts' images: ", error);
+      throw error;
+    }
+  };
+
 
 
 
@@ -284,7 +307,8 @@ export default function useFirebase() {
     isConnected, user, updateUserProfile, uploadImageAndGetUrl,
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     signOut, fetchUserProfile, reauthenticateWithCredential, updatePassword,
-    createPost, getCurrentUserPosts, getAllPosts, toggleLikeOnPost
+    createPost, getCurrentUserPosts, getAllPosts, toggleLikeOnPost,
+    reportPost, getReportedPosts, deleteReportedPost, handleNotAbusivePost,updatePostsImage
     
   }
 }

@@ -20,6 +20,7 @@ const MenuScreen = ({ navigation }) => {
       if (user && user.uid) {
         try {
           const userProfile = await fetchUserProfile(user.uid);
+          console.log(userProfile)
           if (userProfile) {
             setUserData(userProfile);
             setProfileImage(userProfile.profileImageUrl);
@@ -81,7 +82,7 @@ const MenuScreen = ({ navigation }) => {
       )}
 
       <TouchableOpacity onPress={() => {
-       checkfunction()
+       handleLogout();
       }} style={styles.menuItem}>
         <Ionicons name="log-out-outline" size={24} color="#4267B2" />
         <Text style={styles.menuItemText}>Logout</Text>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Pressable, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Pressable, RefreshControl, Dimensions ,Alert} from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import useFirebase from '../hook/useFirebase';
 
+const { width } = Dimensions.get('window');
+
 const HomeScreen = ({ navigation }) => {
-  const { user, getAllPosts, toggleLikeOnPost } = useFirebase();
+  const { user, getAllPosts, toggleLikeOnPost, reportPost } = useFirebase();
   const [posts, setPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -43,6 +45,14 @@ const HomeScreen = ({ navigation }) => {
   const openModal = (postId) => {
     setSelectedPost(postId);
     setModalVisible(true);
+  };
+
+  const handleReportPost = async () => {
+    if (selectedPost) {
+      await reportPost(selectedPost, user.displayName);
+      Alert.alert("Post Reported", "The post has been reported successfully.");
+      setModalVisible(false);
+    }
   };
 
   const renderHeader = () => (
@@ -96,11 +106,11 @@ const HomeScreen = ({ navigation }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(!modalVisible)}
       >
-        <View style={styles.centeredView}>
+        <View style={[styles.centeredView, { right: width * 0.2 }]}>
           <View style={styles.modalView}>
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={handleReportPost}
             >
               <Text style={styles.textStyle}>Report</Text>
             </Pressable>
@@ -197,6 +207,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  centeredView: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+
   button: {
     borderRadius: 20,
     padding: 10,

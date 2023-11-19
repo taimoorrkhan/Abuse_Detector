@@ -22,6 +22,7 @@ export default function SignupScreen({ navigation }) {
   };
 
   return (
+    <>
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
@@ -81,8 +82,10 @@ export default function SignupScreen({ navigation }) {
           )}
         </Formik>
       </ScrollView>
+      </KeyboardAvoidingView>
       <CustomLoadingAnimation isLoading={isLoading} />
-    </KeyboardAvoidingView>
+    </>
+
   );
 }
 

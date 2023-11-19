@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import useFirebase from '../hook/useFirebase';
 const ChangePasswordScreen = () => {
-  const { updatePassword, reauthenticateWithCredential } = useFirebase();
+  const { updatePassword, reauthenticateWithCredential,user } = useFirebase();
 
   const passwordSchema = yup.object({
     currentPassword: yup.string().required('Current password is required'),
@@ -15,7 +15,7 @@ const ChangePasswordScreen = () => {
 
   const handlePasswordChange = async (values, actions) => {
     try {
-      await reauthenticateWithCredential(values.email, values.currentPassword);
+      await reauthenticateWithCredential(user.email, values.currentPassword);
       await updatePassword(values.newPassword);
       Alert.alert("Success", "Password changed successfully.");
       actions.resetForm();

@@ -1,5 +1,5 @@
 // ChangeInfoScreen.js
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -22,11 +22,18 @@ const ChangeInfoScreen = () => {
       Alert.alert("Error", error.message);
     }
   };
+  const [userData, setUserData] = useState({ name: '', email: '' });
+
+  useEffect(() => {
+    if (user) {
+      setUserData({ name: user.displayName || '', email: user.email || '' });
+    }
+  }, [user]);
 
   return (
     <View style={styles.container}>
       <Formik
-        initialValues={{ name: user?.displayName || '', email: user?.email || '' }}
+        initialValues={userData}
         validationSchema={userInfoSchema}
         onSubmit={handleUpdateInfo}
       >
