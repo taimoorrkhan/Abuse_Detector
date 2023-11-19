@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Pressable, RefreshControl, Dimensions ,Alert} from 'react-native';
+import {
+  View, Text, StyleSheet, TouchableOpacity, FlatList,
+  Modal, Pressable, RefreshControl, Dimensions, Alert, Image
+} from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import useFirebase from '../hook/useFirebase';
@@ -66,9 +69,19 @@ const HomeScreen = ({ navigation }) => {
 
     return (
       <View style={styles.postContainer}>
-        <TouchableOpacity style={styles.postOptions} onPress={() => openModal(item.id)}>
-          <MaterialCommunityIcons name="dots-vertical" size={20} color="#65676b" />
-        </TouchableOpacity>
+        <View style={styles.postHeader}>
+          {item.authorImageUrl ? (
+            <Image source={{ uri: item.authorImageUrl }} style={styles.profilePic} />
+          ) : (
+            <MaterialCommunityIcons name="account-circle" size={40} color="#65676b" />
+          )}
+          <View style={styles.authorDetails}>
+            <Text style={styles.authorName}>{item.authorName}</Text>
+            <TouchableOpacity style={styles.postOptions} onPress={() => openModal(item.id)}>
+              <MaterialCommunityIcons name="dots-vertical" size={20} color="#65676b" />
+            </TouchableOpacity>
+          </View>
+        </View>
         <Text style={styles.postText}>{item.text}</Text>
         <View style={styles.divider} />
         <View style={styles.postActions}>
@@ -132,9 +145,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F2F5',
   },
-  scrollView: {
-    flex: 1,
-  },
   whatOnMind: {
     backgroundColor: '#FFF',
     padding: 15,
@@ -154,20 +164,36 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#DADDE1',
-    flexDirection: 'column',
+  },
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  authorDetails: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  authorName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1C1E21',
+  },
+  profilePic: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
   },
   postOptions: {
-    position: 'relative',
     alignSelf: 'flex-start',
   },
   postText: {
     fontSize: 16,
     color: '#1C1E21',
     lineHeight: 24,
-  },
-  showMoreText: {
-    color: '#4B4F56',
-    marginTop: 5,
   },
   divider: {
     borderBottomColor: '#DADDE1',
@@ -191,7 +217,9 @@ const styles = StyleSheet.create({
     color: '#2078F4',
   },
   centeredView: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
@@ -207,15 +235,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  centeredView: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-
   button: {
     borderRadius: 20,
     padding: 10,
