@@ -100,7 +100,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header onMessagesPress={() => navigation.navigate('Messages')} />
+      <Header  />
       <FlatList
         data={posts}
         renderItem={renderPost}

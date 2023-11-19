@@ -11,12 +11,7 @@ const Header = ({ onMessagesPress }) => {
         style={styles.logo}
         resizeMode="contain"
       />
-      <TouchableOpacity onPress={onMessagesPress} style={styles.iconContainer}>
-        <Ionicons name="chatbubbles-outline" size={24} color="white" />
-        <View style={styles.iconBadge}>
-          <Text style={styles.iconBadgeText}>2</Text>
-        </View>
-      </TouchableOpacity>
+
     </View>
   );
 };
