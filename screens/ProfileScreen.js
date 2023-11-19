@@ -1,14 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, RefreshControl } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image,Modal, RefreshControl } from 'react-native';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import useFirebase from '../hook/useFirebase';
 
 const ProfileScreen = ({ navigation }) => {
-  const { user, fetchUserProfile, getCurrentUserPosts, toggleLikeOnPost, uploadImageAndGetUrl, updateUserProfile, updatePostsImage } = useFirebase();
+  const { user, fetchUserProfile, getCurrentUserPosts, toggleLikeOnPost, uploadImageAndGetUrl, updateUserProfile, updatePostsImage,deleteCurrentUserPost } = useFirebase();
   const [userdata, setUserData] = useState({ name: "", profileImageUrl: "" });
   const [userPosts, setUserPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [postOptionsModalVisible, setPostOptionsModalVisible] = useState(false);
+  const [selectedPostForOptions, setSelectedPostForOptions] = useState(null);
+
+  const openPostOptionsModal = (post) => {
+    setSelectedPostForOptions(post);
+    setPostOptionsModalVisible(true);
+  };
+
+  const handleDeletePost = async () => {
+    if (selectedPostForOptions) {
+      await deleteCurrentUserPost(selectedPostForOptions.id);
+      setUserPosts(currentPosts => currentPosts.filter(post => post.id !== selectedPostForOptions.id));
+      setPostOptionsModalVisible(false);
+    }
+  };
+
+  const navigateToEditPost = () => {
+    navigation.navigate('EditPostScreen', { post: selectedPostForOptions });
+    setPostOptionsModalVisible(false);
+  };
   const loadUserProfile = async () => {
     if (user && user.uid) {
       try {
@@ -64,6 +84,9 @@ const ProfileScreen = ({ navigation }) => {
       }
     }
   };
+  const closeModal = () => {
+    setPostOptionsModalVisible(false);
+  };
 
   const handleToggleLike = async (postId) => {
     await toggleLikeOnPost(postId);
@@ -92,7 +115,9 @@ const ProfileScreen = ({ navigation }) => {
           )}
           <View style={styles.authorDetails}>
             <Text style={styles.authorName}>{item.authorName}</Text>
-            <TouchableOpacity style={styles.postOptions} onPress={() => console.log("")}>
+            <TouchableOpacity style={styles.postOptions} onPress={() =>
+              openPostOptionsModal(item)
+            }>
               <MaterialCommunityIcons name="dots-vertical" size={20} color="#65676b" />
             </TouchableOpacity>
           </View>
@@ -140,6 +165,29 @@ const ProfileScreen = ({ navigation }) => {
           />
         }
       />
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={postOptionsModalVisible}
+        onRequestClose={
+          closeModal
+        }
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity style={styles.modalOption} onPress={navigateToEditPost}>
+              <FontAwesome5 name="edit" size={20} color="#4267B2" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalOption} onPress={handleDeletePost}>
+              <FontAwesome5 name="trash-alt" size={20} color="#E02424" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalOption} onPress={closeModal}>
+              {/* close mark icon */}
+              <FontAwesome5 name="times" size={20} color="#1C1E21" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -238,6 +286,37 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    width: '50%',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    marginBottom: 20,
+  },
+  modalOptionText: {
+    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1C1E21',
+  },
+
 });
 
 export default ProfileScreen;

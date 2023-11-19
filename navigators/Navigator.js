@@ -6,7 +6,8 @@ import {
   MenuScreen,SignupScreen,
   LoginScreen, ReportedPostScreen,
   CreatePostScreen,
-  ProfileScreen
+  ProfileScreen,
+  EditPostScreen
 } from '../screens/index';
 const Stack = createStackNavigator();
 
@@ -43,8 +44,10 @@ const StackNavigator = () => {
             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
             <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
             <Stack.Screen name="Menu" component={MenuScreen} />
-        <Stack.Screen name="ReportedPost" component={ReportedPostScreen} />
-        <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+            <Stack.Screen name="ReportedPost" component={ReportedPostScreen} />
+            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="EditPostScreen" component={EditPostScreen} />
 
           </>
     

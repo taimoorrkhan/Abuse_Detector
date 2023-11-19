@@ -20,7 +20,6 @@ const MenuScreen = ({ navigation }) => {
       if (user && user.uid) {
         try {
           const userProfile = await fetchUserProfile(user.uid);
-          console.log(userProfile)
           if (userProfile) {
             setUserData(userProfile);
             setProfileImage(userProfile.profileImageUrl);
@@ -32,10 +31,7 @@ const MenuScreen = ({ navigation }) => {
     };
     loadUserProfile();
   }, [user]);
- 
-  const checkfunction = () => {
-    console.log(userdata.email, userdata.uid, userdata.name, userdata.userRole)
-  }
+
 
 
   const handleLogout = async () => {
